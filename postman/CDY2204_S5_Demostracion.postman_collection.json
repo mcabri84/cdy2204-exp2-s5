@@ -1,0 +1,434 @@
+{
+  "info": {
+    "_postman_id": "32f0954c-a235-47ee-97c6-7194b0bc5621",
+    "name": "CDY2204 S5 Demostracion",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Demostracion individual S5: API Gateway, B2C, Spring Security y resumenes PDF/S3. Datos ficticios. Ejecutar en orden; elimina solo el resumen generado en esta corrida."
+  },
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "grant_type",
+        "value": "authorization_code_with_pkce",
+        "type": "string"
+      },
+      {
+        "key": "authUrl",
+        "value": "{{auth_url}}",
+        "type": "string"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "{{token_url}}",
+        "type": "string"
+      },
+      {
+        "key": "clientId",
+        "value": "{{client_id}}",
+        "type": "string"
+      },
+      {
+        "key": "clientSecret",
+        "value": "",
+        "type": "string"
+      },
+      {
+        "key": "scope",
+        "value": "{{scope}}",
+        "type": "string"
+      },
+      {
+        "key": "redirect_uri",
+        "value": "{{callback_url}}",
+        "type": "string"
+      },
+      {
+        "key": "code_challenge_method",
+        "value": "S256",
+        "type": "string"
+      },
+      {
+        "key": "client_authentication",
+        "value": "body",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      },
+      {
+        "key": "useBrowser",
+        "value": true,
+        "type": "boolean"
+      },
+      {
+        "key": "tokenName",
+        "value": "Eventos B2C",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "auth_url",
+      "value": "https://gestionguiasmcabri2026.b2clogin.com/gestionguiasmcabri2026.onmicrosoft.com/b2c_1_eventos_signupsignin/oauth2/v2.0/authorize",
+      "type": "string"
+    },
+    {
+      "key": "token_url",
+      "value": "https://gestionguiasmcabri2026.b2clogin.com/gestionguiasmcabri2026.onmicrosoft.com/b2c_1_eventos_signupsignin/oauth2/v2.0/token",
+      "type": "string"
+    },
+    {
+      "key": "client_id",
+      "value": "effd7ef2-ad06-4e4f-bb39-1b690fef64e8",
+      "type": "string"
+    },
+    {
+      "key": "callback_url",
+      "value": "https://oauth.pstmn.io/v1/browser-callback",
+      "type": "string"
+    },
+    {
+      "key": "scope",
+      "value": "openid https://gestionguiasmcabri2026.onmicrosoft.com/0c3e4311-80ac-4edb-8a72-7c9b248cbfb1/eventos.access",
+      "type": "string"
+    },
+    {
+      "key": "issuer",
+      "value": "https://gestionguiasmcabri2026.b2clogin.com/tfp/3f3062b4-4f5c-4d4f-a8de-239dc8df83f7/b2c_1_eventos_signupsignin/v2.0/",
+      "type": "string"
+    },
+    {
+      "key": "base_url",
+      "value": "https://74ah7suova.execute-api.us-east-1.amazonaws.com/lab",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Sin token - rechazo Gateway",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/eventos",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\",()=>pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Listar eventos autenticado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/eventos"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Crear evento de demostracion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/eventos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nombre\": \"Demo S5 {{$timestamp}}\", \"fecha\": \"2026-12-15T18:00:00\", \"precio\": 10000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"evento_id\",pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Crear compra",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/reservas",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"eventoId\": \"{{evento_id}}\", \"usuario\": \"demo-s5\", \"cantidad\": 2}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"reserva_id\",pm.response.json().id);",
+              "pm.test(\"Total 20000\",()=>pm.expect(pm.response.json().total).to.eql(20000));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Estadisticas del evento",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/eventos/{{evento_id}}/estadisticas"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Generar resumen PDF local",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/generar/{{reserva_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "const t=pm.response.json(); pm.collectionVariables.set(\"ticket_id\",t.id); pm.collectionVariables.set(\"numero_resumen\",t.numeroResumen);",
+              "pm.test(\"Todavia sin S3\",()=>pm.expect(t.claveS3).to.be.null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Descargar PDF antes de subir",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/{{ticket_id}}/descargar"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"PDF\",()=>pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Subir resumen a S3",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/{{ticket_id}}/subir"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "const t=pm.response.json(); pm.collectionVariables.set(\"clave_s3\",t.claveS3);",
+              "pm.test(\"Carpeta por numero de resumen\",()=>pm.expect(t.claveS3).to.match(new RegExp(\"^\"+t.numeroResumen+\"/\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Historial de resumenes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/historial?eventoId={{evento_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Modificar resumen subido",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/tickets/{{ticket_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"detalle\": \"Resumen corregido en demostracion S5\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Misma clave S3\",()=>pm.expect(pm.response.json().claveS3).to.eql(pm.collectionVariables.get(\"clave_s3\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Descargar PDF desde S3",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/{{ticket_id}}/descargar"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"PDF\",()=>pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Descargar ZIP del evento",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/descargar?eventoId={{evento_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"ZIP\",()=>pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/zip\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Eliminar resumen de prueba",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/{{ticket_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Confirmar eliminacion",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/tickets/{{ticket_id}}/descargar"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\",()=>pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

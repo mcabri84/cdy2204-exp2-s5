@@ -1,0 +1,100 @@
+{
+  "fecha": "2026-11-23",
+  "metodo": "Postman web, Cloud Agent, Runner; API Gateway real hacia backend EC2 y S3 real",
+  "run_url": "https://mi-cabrillana-9049083.postman.co/workspace/MIGUEL-ANDRES-CABRILLANA-SANHUE~a175e2f6-8c4e-46cb-8882-1b7ab0c5cfb3/run/59573807-1fd525a4-ee23-4d4d-ae20-d4b8146819fd",
+  "inicio_local": "14:38:26 America/Santiago",
+  "duracion_ms": 15889,
+  "solicitudes": 14,
+  "comprobaciones": 21,
+  "errores": 0,
+  "fallidas": 0,
+  "verificacion_fallidas": "Pestana Failed: No failed tests",
+  "backend_commit": "1fe4f20",
+  "deploy_run": "https://github.com/mcabri84/cdy2204-exp1-s3/actions/runs/45229246714",
+  "resultados": [
+    {
+      "paso": 1,
+      "solicitud": "01 Sin token - rechazo Gateway",
+      "http": 401
+    },
+    {
+      "paso": 2,
+      "solicitud": "02 Listar eventos autenticado",
+      "http": 200
+    },
+    {
+      "paso": 3,
+      "solicitud": "03 Crear evento de demostracion",
+      "http": 201
+    },
+    {
+      "paso": 4,
+      "solicitud": "04 Crear compra",
+      "http": 201
+    },
+    {
+      "paso": 5,
+      "solicitud": "05 Estadisticas del evento",
+      "http": 200
+    },
+    {
+      "paso": 6,
+      "solicitud": "06 Generar resumen PDF local",
+      "http": 201
+    },
+    {
+      "paso": 7,
+      "solicitud": "07 Descargar PDF antes de subir",
+      "http": 200
+    },
+    {
+      "paso": 8,
+      "solicitud": "08 Subir resumen a S3",
+      "http": 200
+    },
+    {
+      "paso": 9,
+      "solicitud": "09 Historial de resumenes",
+      "http": 200
+    },
+    {
+      "paso": 10,
+      "solicitud": "10 Modificar resumen subido",
+      "http": 200
+    },
+    {
+      "paso": 11,
+      "solicitud": "11 Descargar PDF desde S3",
+      "http": 200
+    },
+    {
+      "paso": 12,
+      "solicitud": "12 Descargar ZIP del evento",
+      "http": 200
+    },
+    {
+      "paso": 13,
+      "solicitud": "13 Eliminar resumen de prueba",
+      "http": 204
+    },
+    {
+      "paso": 14,
+      "solicitud": "14 Confirmar eliminacion",
+      "http": 404
+    }
+  ],
+  "comprobaciones_adicionales": [
+    "Compra total 20000",
+    "Generacion PDF antes de subir con claveS3 null",
+    "PDF descargable antes de subida",
+    "Clave S3 comienza con numeroResumen/",
+    "Modificacion conserva clave S3",
+    "PDF descargable desde S3",
+    "ZIP descargable"
+  ],
+  "limites": [
+    "Registro transcrito de resultados visibles del Runner; no es una exportacion automatica del servidor.",
+    "No incluye token ni datos de cuenta.",
+    "Los escenarios JWT negativos adicionales estan cubiertos por pruebas locales con claves efimeras; la prueba real comprueba token valido y ausencia de token."
+  ]
+}

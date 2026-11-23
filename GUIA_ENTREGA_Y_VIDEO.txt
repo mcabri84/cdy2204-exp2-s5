@@ -1,0 +1,37 @@
+CDY2204 — EXPERIENCIA 2, SEMANA 5
+Modalidad individual autorizada por el estudiante.
+
+ESTADO TÉCNICO
+Backend con Spring Security, Azure B2C, API Gateway y S3 verificado en una corrida real: 14 solicitudes, 21 comprobaciones, 0 errores y ninguna prueba fallida. Además, 17 pruebas Maven aprobadas y despliegue GitHub Actions exitoso. Las 11 rutas rechazan solicitudes sin token.
+
+REPOSITORIO PARA AVA
+https://github.com/mcabri84/cdy2204-exp1-s3/tree/exp2-semana5
+Usar la rama exp2-semana5. La rama main conserva la actividad anterior.
+
+API
+https://74ah7suova.execute-api.us-east-1.amazonaws.com/lab
+
+POSTMAN YA PREPARADO
+Colección: CDY2204 S5 Demostracion, dentro del workspace existente.
+https://mi-cabrillana-9049083.postman.co/workspace/MIGUEL-ANDRES-CABRILLANA-SANHUE~a175e2f6-8c4e-46cb-8882-1b7ab0c5cfb3/collection/59573807-0e7d5b69-ea03-46d6-9228-bb6a9e2df39e
+Resultado real:
+https://mi-cabrillana-9049083.postman.co/workspace/MIGUEL-ANDRES-CABRILLANA-SANHUE~a175e2f6-8c4e-46cb-8882-1b7ab0c5cfb3/run/59573807-1fd525a4-ee23-4d4d-ae20-d4b8146819fd
+
+VIDEO PENDIENTE — TEAMS
+La pauta pide demostrar en video todas las funciones implementadas mediante Postman. La grabación y la entrega en AVA aún no están hechas. Duración sugerida: 6–8 minutos; esta duración es una sugerencia, no un requisito indicado en los documentos.
+
+1. Inicia una reunión individual en Teams y la grabación. Comparte solo la ventana de demostración. Evita mostrar contraseñas y el contenido de los tokens.
+2. Presenta brevemente: cliente Postman → HTTPS API Gateway → backend Spring Boot en EC2 → S3. Azure B2C entrega el token; Gateway y Spring Security lo validan y exigen eventos.access. El tramo Gateway→EC2 usa HTTP8080 público, autorizado para este laboratorio; no describirlo como cifrado ni como acceso exclusivo a través del Gateway.
+3. Muestra Azure: aplicaciones cdy2204-eventos-api y cdy2204-eventos-cliente, flujo B2C_1_eventos_signupsignin y permiso eventos.access. No necesitas mostrar el token completo.
+4. Muestra API Gateway: once rutas, autorizador JWT b2c-eventos y etapa lab.
+5. En Postman abre la colección CDY2204 S5 Demostracion. Usa Cloud Agent. En Authorization, si el token expiró, pulsa Get new access token, inicia sesión personalmente si se solicita y pulsa Use Token. Mantén Share Token desactivado.
+6. Para mostrar cada función con calma, ejecuta las solicitudes 01 a 14 en orden. Los scripts guardan evento_id, reserva_id y ticket_id automáticamente. También puedes usar Run, una iteración, y luego abrir los resultados de cada paso.
+7. Explica resultados: 01 sin token401; 02 listado200; 03 evento201; 04 compra201 y total20000; 05 estadísticas200; 06 PDF local201 sin clave S3; 07 descarga PDF200; 08 subida200 con carpeta numeroResumen/; 09 historial200; 10 modificación200 y misma clave S3; 11 PDF actualizado200; 12 ZIP200; 13 eliminación204; 14 descarga posterior404.
+8. Si quieres mostrar el objeto en la consola S3, detente después del paso08, abre el bucket duoc-cdy2204-tickets-763911473229-20261104 y busca la carpeta indicada por numero_resumen. Continúa los demás pasos después de mostrarlo; el paso13 elimina ese objeto de prueba.
+9. Termina la grabación y espera a que Teams la procese. Comprueba que el docente tenga acceso al enlace según el mecanismo permitido por Duoc. No hagas el video público innecesariamente.
+
+ENTREGA AVA PENDIENTE
+Adjunta CDY2204_Exp2_S5_Entrega.zip y pega el enlace del repositorio con la rama exp2-semana5. Incluye el video o su enlace donde lo solicite el AVA/docente. Comprueba que todos los archivos se cargaron y confirma la entrega tú mismo. No se ha enviado nada al AVA.
+
+NOTAS PARA RETOMAR
+El laboratorio AWS debe estar activo para repetir la demostración. La IP EC2 actual es 44.200.53.204; puede cambiar tras detener/arrancar la instancia y requerir actualizar las integraciones. No guardes tokens ni credenciales en el repositorio o el ZIP. El proyecto usa IAM del entorno para S3.

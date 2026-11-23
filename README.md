@@ -72,3 +72,10 @@ java -jar target/reservas-tickets-0.0.1-SNAPSHOT.jar
 ```
 
 El workflow de GitHub Actions ejecuta `mvn verify`, construye la imagen Docker, la publica en Docker Hub y define el despliegue en el runner EC2 existente. La comprobación de arranque espera HTTP 401 en `/api/eventos`, porque la ruta requiere autenticación. La validación funcional con token se realiza por separado.
+
+
+## Despliegue y demostración S5 verificados
+
+API Gateway: `https://74ah7suova.execute-api.us-east-1.amazonaws.com/lab`. Once operaciones protegidas con JWT y `eventos.access`. Evidencia real: `evidencias/gateway-s3-real.json` (14 solicitudes, 21 comprobaciones, cero errores). Colección reproducible en `postman/`; definición Gateway en `infra/`. Instrucciones de grabación y entrega en `GUIA_ENTREGA_Y_VIDEO.txt`.
+
+La integración pública usa HTTP hacia EC2:8080; el cliente usa HTTPS hacia Gateway. Spring Security también exige JWT en acceso directo. Esta configuración de laboratorio no impide saltarse Gateway con un token válido.

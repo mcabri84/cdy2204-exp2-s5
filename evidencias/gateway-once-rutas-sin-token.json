@@ -1,0 +1,57 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/eventos",
+    "status_without_token": 401
+  },
+  {
+    "method": "POST",
+    "path": "/api/eventos",
+    "status_without_token": 401
+  },
+  {
+    "method": "POST",
+    "path": "/api/reservas",
+    "status_without_token": 401
+  },
+  {
+    "method": "GET",
+    "path": "/api/eventos/1/estadisticas",
+    "status_without_token": 401
+  },
+  {
+    "method": "POST",
+    "path": "/api/tickets/generar/1",
+    "status_without_token": 401
+  },
+  {
+    "method": "POST",
+    "path": "/api/tickets/1/subir",
+    "status_without_token": 401
+  },
+  {
+    "method": "GET",
+    "path": "/api/tickets/historial",
+    "status_without_token": 401
+  },
+  {
+    "method": "PUT",
+    "path": "/api/tickets/1",
+    "status_without_token": 401
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/tickets/1",
+    "status_without_token": 401
+  },
+  {
+    "method": "GET",
+    "path": "/api/tickets/1/descargar",
+    "status_without_token": 401
+  },
+  {
+    "method": "GET",
+    "path": "/api/tickets/descargar",
+    "status_without_token": 401
+  }
+]

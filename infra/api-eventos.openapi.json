@@ -1,0 +1,336 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "cdy2204-eventos-http",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/eventos": {
+      "get": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "GET",
+          "uri": "http://44.200.53.204:8080/api/eventos",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        }
+      },
+      "post": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "POST",
+          "uri": "http://44.200.53.204:8080/api/eventos",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        }
+      }
+    },
+    "/api/reservas": {
+      "post": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "POST",
+          "uri": "http://44.200.53.204:8080/api/reservas",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        }
+      }
+    },
+    "/api/eventos/{id}/estadisticas": {
+      "get": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "GET",
+          "uri": "http://44.200.53.204:8080/api/eventos/{id}/estadisticas",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/tickets/generar/{reservaId}": {
+      "post": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "POST",
+          "uri": "http://44.200.53.204:8080/api/tickets/generar/{reservaId}",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        },
+        "parameters": [
+          {
+            "name": "reservaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/tickets/{id}/subir": {
+      "post": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "POST",
+          "uri": "http://44.200.53.204:8080/api/tickets/{id}/subir",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/tickets/historial": {
+      "get": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "GET",
+          "uri": "http://44.200.53.204:8080/api/tickets/historial",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        }
+      }
+    },
+    "/api/tickets/{id}": {
+      "put": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "PUT",
+          "uri": "http://44.200.53.204:8080/api/tickets/{id}",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "DELETE",
+          "uri": "http://44.200.53.204:8080/api/tickets/{id}",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/tickets/{id}/descargar": {
+      "get": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "GET",
+          "uri": "http://44.200.53.204:8080/api/tickets/{id}/descargar",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/tickets/descargar": {
+      "get": {
+        "responses": {
+          "default": {
+            "description": "Respuesta del backend"
+          }
+        },
+        "security": [
+          {
+            "b2c-eventos": [
+              "eventos.access"
+            ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "type": "http_proxy",
+          "httpMethod": "GET",
+          "uri": "http://44.200.53.204:8080/api/tickets/descargar",
+          "payloadFormatVersion": "1.0",
+          "connectionType": "INTERNET"
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "b2c-eventos": {
+        "type": "oauth2",
+        "flows": {},
+        "x-amazon-apigateway-authorizer": {
+          "type": "jwt",
+          "identitySource": "$request.header.Authorization",
+          "jwtConfiguration": {
+            "audience": [
+              "0c3e4311-80ac-4edb-8a72-7c9b248cbfb1"
+            ],
+            "issuer": "https://gestionguiasmcabri2026.b2clogin.com/tfp/3f3062b4-4f5c-4d4f-a8de-239dc8df83f7/b2c_1_eventos_signupsignin/v2.0/"
+          }
+        }
+      }
+    }
+  }
+}
