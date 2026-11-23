@@ -24,7 +24,7 @@ jobs:
           cache: maven
 
       - name: Compilar Spring Boot
-        run: mvn -B -DskipTests package
+        run: mvn -B verify
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -62,10 +62,27 @@ jobs:
           set -euo pipefail
 
           IMAGE="mcabri/cdy2204-exp1-s3:${GITHUB_SHA}"
+          BACKUP="duoc-reservas-anterior-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
           sudo docker pull "$IMAGE"
 
-          sudo docker rm -f duoc-reservas || true
+          if sudo docker inspect duoc-reservas > /dev/null 2>&1; then
+            sudo docker stop duoc-reservas
+            sudo docker rename duoc-reservas "$BACKUP"
+          fi
+
+          restaurar_si_falla() {
+            RESULTADO=$?
+            if [ "$RESULTADO" -ne 0 ]; then
+              echo "El despliegue fallo; restaurando el contenedor anterior..."
+              sudo docker rm -f duoc-reservas || true
+              if sudo docker inspect "$BACKUP" > /dev/null 2>&1; then
+                sudo docker rename "$BACKUP" duoc-reservas
+                sudo docker start duoc-reservas
+              fi
+            fi
+          }
+          trap restaurar_si_falla EXIT
 
           sudo docker run -d \
             --name duoc-reservas \
@@ -81,7 +98,9 @@ jobs:
           echo "Verificando Spring Boot..."
 
           for i in $(seq 1 30); do
-            if curl -fsS http://localhost:8080/api/eventos > /dev/null 2>&1; then
+            # La ruta protegida responde 401 cuando la aplicacion esta lista.
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/eventos || true)
+            if [ "$STATUS" = "401" ]; then
               echo "DESPLIEGUE EC2 EXITOSO"
               exit 0
             fi

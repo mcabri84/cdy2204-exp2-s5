@@ -1,140 +1,74 @@
-# CDY2204 - Actividad Sumativa 1
-## Sistema Cloud Native de Reservas y Tickets
+# CDY2204 Semana 5 Sistema de eventos y resumenes de compra
 
-### 1. Descripción
+API REST con Java 17 y Spring Boot 4.0.9 para gestionar eventos, registrar compras y generar resúmenes PDF. Spring Security protege todos los endpoints de negocio mediante access tokens de Azure AD B2C con el permiso `eventos.access`.
 
-Aplicación REST desarrollada en Java y Spring Boot para gestionar
-eventos, reservas y tickets electrónicos en formato PDF.
+## Resumenes de compra
 
-La solución utiliza servicios de AWS para el almacenamiento de
-tickets y Docker para su ejecución en la nube.
+Cada resumen utiliza el número de su reserva de compra como `numeroResumen`. Su identificador técnico `id` sigue siendo un UUID y se utiliza en las rutas de la API. El archivo contiene el número del resumen, evento, comprador, fecha, cantidad, precio unitario y total.
 
-### 2. Tecnologías utilizadas
+El proceso tiene dos operaciones separadas:
 
-- Java 17
-- Spring Boot 4.0.9
-- Maven
-- Apache PDFBox
-- H2 Database
-- Docker
-- AWS EC2
-- AWS Elastic File System (EFS)
-- AWS S3
-- GitHub Actions
-- Docker Hub
-- Postman
+1. `POST /api/tickets/generar/{reservaId}` crea el PDF físico y registra sus metadatos. La respuesta incluye `numeroResumen`, `nombreArchivo` e `id`; `claveS3` es nula hasta la subida.
+2. `POST /api/tickets/{id}/subir` sube el archivo generado al bucket configurado. La carpeta de S3 se llama igual que `numeroResumen` y contiene el PDF cuyo nombre figura en `nombreArchivo`.
 
-### 3. Arquitectura
+`GET /api/tickets/{id}/descargar` permite guardar el PDF en el computador. Antes de la subida lee el archivo local; después lo obtiene desde S3. `PUT /api/tickets/{id}` regenera el PDF con un detalle corregido y, si ya fue subido, actualiza el mismo objeto de S3. Las claves antiguas se conservan al modificar resúmenes de la versión anterior.
 
-Cliente Postman
-      |
-      v
-API REST Spring Boot
-      |
-      v
-Docker en AWS EC2
-      |
-      +-- H2: eventos, reservas y tickets
-      |
-      +-- AWS EFS: almacenamiento de archivos PDF
-      |
-      +-- AWS S3: almacenamiento de tickets por evento y usuario
+## Endpoints
 
-Los tickets PDF se generan en el directorio montado desde EFS
-y se almacenan en S3 mediante la integración de la aplicación.
-
-Estructura utilizada en S3:
-
-eventoN/usuario/ticket-uuid.pdf
-
-### 4. Endpoints REST
-
-| Método | Endpoint | Función |
+| Método | Ruta | Función |
 |---|---|---|
-| GET | /api/eventos | Listar eventos |
-| POST | /api/eventos | Crear evento |
-| POST | /api/reservas | Registrar reserva |
-| GET | /api/eventos/{id}/estadisticas | Consultar estadísticas |
-| POST | /api/tickets/generar/{reservaId} | Generar PDF y subir a S3 |
-| GET | /api/tickets/historial | Consultar historial |
-| PUT | /api/tickets/{id} | Modificar ticket |
-| GET | /api/tickets/{id}/descargar | Descargar PDF |
-| GET | /api/tickets/descargar?usuario=nombre | Descargar ZIP |
-| DELETE | /api/tickets/{id} | Eliminar ticket |
+| GET | `/api/eventos` | Listar eventos |
+| POST | `/api/eventos` | Crear un evento |
+| POST | `/api/reservas` | Registrar una compra |
+| GET | `/api/eventos/{id}/estadisticas` | Consultar ventas del evento |
+| POST | `/api/tickets/generar/{reservaId}` | Generar el resumen PDF local |
+| POST | `/api/tickets/{id}/subir` | Subir el resumen a S3 |
+| GET | `/api/tickets/historial` | Consultar los resúmenes |
+| PUT | `/api/tickets/{id}` | Corregir el detalle y actualizar el PDF |
+| GET | `/api/tickets/{id}/descargar` | Descargar un PDF |
+| GET | `/api/tickets/descargar` | Descargar un ZIP filtrado por `eventoId` o `usuario` |
+| DELETE | `/api/tickets/{id}` | Eliminar el objeto S3, los metadatos y el PDF local |
 
-### 5. Infraestructura AWS
+Ejemplo del cuerpo de una corrección:
 
-Región: us-east-1
+```json
+{"detalle":"Ingreso por puerta norte"}
+```
 
-- EC2: instancia t3.small con Docker.
-- EFS: duoc-cdy2204-efs.
-- S3: duoc-cdy2204-tickets-763911473229-20261104.
-- IAM: LabInstanceProfile para acceso a servicios AWS.
+## Autenticacion
 
-El bucket S3 tiene el acceso público bloqueado y versionado habilitado.
+La API funciona sin sesiones y requiere un encabezado Bearer con un access token. El backend valida la firma RSA con las claves públicas de B2C, el emisor, las fechas, la audiencia de la API y el flujo `B2C_1_eventos_signupsignin`. El permiso requerido es `eventos.access`.
 
-### 6. Integración continua y despliegue
+- Sin token o con un token inválido: HTTP 401.
+- Token válido sin el permiso requerido: HTTP 403.
+- Un ID token destinado al cliente no reemplaza al access token de la API.
 
-El workflow de GitHub Actions realiza:
+Los valores públicos del registro de eventos están configurados en `application.properties`. Se pueden sustituir mediante `B2C_ISSUER`, `B2C_JWKS_URI`, `B2C_AUDIENCE` y `B2C_POLICY`.
 
-1. Obtención del código fuente.
-2. Compilación de la aplicación Java.
-3. Construcción de la imagen Docker.
-4. Publicación de la imagen en Docker Hub.
-5. Despliegue en EC2 mediante un runner autoalojado.
+## Configuracion de almacenamiento
 
-Docker Hub:
-https://hub.docker.com/r/mcabri/cdy2204-exp1-s3
+| Variable | Uso |
+|---|---|
+| `S3_BUCKET` | Nombre del bucket para las operaciones de subida, descarga y eliminación |
+| `AWS_REGION` | Región AWS; valor predeterminado `us-east-1` |
+| `TICKETS_DIR` | Directorio persistente de los PDF; valor predeterminado `./data/tickets` |
 
-GitHub:
-https://github.com/mcabri84/cdy2204-exp1-s3
+El SDK utiliza su cadena estándar de credenciales. En EC2 puede utilizar el rol IAM de la instancia. No se almacenan claves AWS ni tokens en el código.
 
-### 7. Pruebas realizadas
+La base H2 de la aplicación se guarda en `./data/reservas`. El contenedor conserva los montajes del proyecto anterior: `/app/data` para H2 y `/tickets` para los PDF en EFS.
 
-Se utilizó una colección de Postman con 10 solicitudes REST.
+## Compilacion y pruebas
 
-Resultados de la ejecución:
+```bash
+mvn verify
+```
 
-- Pruebas aprobadas: 10
-- Pruebas fallidas: 0
-- Errores: 0
+Las pruebas de seguridad ejecutan solicitudes HTTP contra Spring Boot con JWT firmados mediante claves efímeras y un servidor local de claves públicas. Las pruebas de resúmenes verifican la creación de la compra, el PDF descargable, su número, el total, la carpeta de S3, la actualización del archivo, la descarga ZIP y la eliminación. Las bases y los archivos de prueba son temporales; S3 está simulado y no se accede al bucket real.
 
-La colección está incluida en las evidencias como
-CDY2204_Postman.json.
+## Ejecucion y despliegue
 
-También se verificaron:
+```bash
+java -jar target/reservas-tickets-0.0.1-SNAPSHOT.jar
+```
 
-- Archivo PDF almacenado en AWS S3.
-- Sistema EFS montado en EC2 mediante NFS.
-- Archivo PDF presente en el directorio EFS.
-- Contenedor Docker ejecutándose en EC2.
-- Publicación de imágenes en Docker Hub.
-- Workflow GitHub Actions ejecutado exitosamente.
-
-### 8. Evidencias
-
-01_Postman_10_Pruebas.png
-02_GitHub_Actions.png
-03_AWS_S3.png
-04_AWS_EFS.png
-05_EFS_PDF_EC2.png
-06_Docker_EC2.png
-07_Docker_Hub.png
-CDY2204_Postman.json
-
-### 9. Consideraciones
-
-El laboratorio AWS Academy utiliza credenciales temporales.
-Al reiniciar el laboratorio puede ser necesario actualizar
-las credenciales y verificar el estado de la instancia EC2.
-
-El acceso externo a la API durante las pruebas se realizó
-mediante AWS Systems Manager Session Manager con un túnel
-hacia el puerto 8080 del contenedor.
-
-### 10. Entrega
-
-Proyecto desarrollado para la asignatura CDY2204 de Duoc UC.
-
-La entrega se complementa con documentación, evidencias
-y un video demostrativo de las funcionalidades.
+El workflow de GitHub Actions ejecuta `mvn verify`, construye la imagen Docker, la publica en Docker Hub y define el despliegue en el runner EC2 existente. La comprobación de arranque espera HTTP 401 en `/api/eventos`, porque la ruta requiere autenticación. La validación funcional con token se realiza por separado.

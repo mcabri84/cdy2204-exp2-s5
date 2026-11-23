@@ -1,0 +1,31 @@
+{
+  "resultado": "APROBADO",
+  "maven": "verify",
+  "tests_totales": 17,
+  "pruebas_resumenes": {
+    "suite": "cl.duoc.reservastickets.ResumenCompraIntegrationTests",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      "cicloGenerarDescargarSubirModificarYBorrar",
+      "subirUnResumenInexistenteDevuelve404",
+      "puedeCorregirYEliminarUnResumenSinSubirlo"
+    ]
+  },
+  "alcance": "HTTP real contra Spring Boot; PDF real y bases en memoria; S3Client simulado",
+  "comprobaciones": [
+    "Resumen numerado por reserva y PDF fisico",
+    "Descarga PDF antes de subir sin llamadas S3",
+    "Clave S3 numeroResumen/nombreArchivo",
+    "Descarga S3 aunque se elimine la copia local de prueba",
+    "Correccion PDF sobrescribe misma clave",
+    "ZIP descargable con PDF corregido",
+    "Eliminacion objeto, metadatos y archivo local",
+    "Edicion y eliminacion antes de subir sin llamadas S3",
+    "Subida de resumen inexistente responde404",
+    "Once endpoints protegidos sin token"
+  ],
+  "aws_real": "No utilizado; verificacion del bucket pendiente de despliegue"
+}

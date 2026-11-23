@@ -8,6 +8,8 @@ public class Ticket {
     @Id
     public String id;
     public Long reservaId;
+    // El resumen utiliza el numero de la reserva de compra que documenta.
+    public Long numeroResumen;
     public Long eventoId;
     public String usuario;
     public String nombreArchivo;

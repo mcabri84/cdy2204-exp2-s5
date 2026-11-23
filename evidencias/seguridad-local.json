@@ -1,0 +1,43 @@
+{
+  "verificacion": "mvn verify",
+  "resultado": "APROBADO",
+  "tests": 14,
+  "fallos": 0,
+  "errores": 0,
+  "alcance": "Servidor Spring Boot real con H2 en memoria y claves RSA efimeras servidas por JWKS local; no usa tokens ni secretos reales",
+  "pendiente": "Prueba del access token Azure contra el backend desplegado y operaciones reales S3",
+  "suites": [
+    {
+      "suite": "cl.duoc.reservastickets.ReservasTicketsApplicationTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "contextLoads"
+      ]
+    },
+    {
+      "suite": "cl.duoc.reservastickets.SecurityIntegrationTests",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "tokenForClientInsteadOfApiIsRejected",
+        "recoveryPolicyIsRejected",
+        "signedAccessTokenAllowsReadingEventsWithoutCreatingSession",
+        "wrongIssuerIsRejected",
+        "signatureFromUnknownKeyIsRejected",
+        "authenticatedBusinessErrorsKeepTheirStatusCodes",
+        "missingAudienceIsRejected",
+        "malformedTokenIsRejected",
+        "validTokenWithoutRequiredScopeIsForbidden",
+        "tokenNotYetValidIsRejected",
+        "signedAccessTokenAllowsCreatingEvent",
+        "allEndpointsRejectMissingToken",
+        "expiredTokenIsRejected"
+      ]
+    }
+  ]
+}

@@ -3,13 +3,9 @@ package cl.duoc.reservastickets;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.apache.pdfbox.pdmodel.*;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.*;
 
 import java.io.*;
 import java.nio.file.*;
-import java.text.Normalizer;
 import java.util.*;
 import java.util.zip.*;
 
@@ -21,16 +17,18 @@ public class TicketOperationsController {
     private final ReservaRepository reservas;
     private final EventoRepository eventos;
     private final S3StorageService storage;
+    private final ResumenPdfService pdf;
 
     public TicketOperationsController(
             TicketRepository tickets,
             ReservaRepository reservas,
             EventoRepository eventos,
-            S3StorageService storage) {
+            S3StorageService storage, ResumenPdfService pdf) {
         this.tickets = tickets;
         this.reservas = reservas;
         this.eventos = eventos;
         this.storage = storage;
+        this.pdf = pdf;
     }
 
     private Ticket buscar(String id) {
@@ -56,17 +54,14 @@ public class TicketOperationsController {
     }
 
     @GetMapping("/{id}/descargar")
-    public ResponseEntity<byte[]> descargar(@PathVariable String id) {
+    public ResponseEntity<byte[]> descargar(@PathVariable String id) throws IOException {
         Ticket t = buscar(id);
-        if (t.claveS3 == null)
-            throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Ticket no almacenado en S3");
 
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_PDF)
             .header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + t.nombreArchivo + "\"")
-            .body(storage.descargar(t.claveS3));
+            .body(contenido(t));
     }
 
     @GetMapping("/descargar")
@@ -78,8 +73,7 @@ public class TicketOperationsController {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Indique eventoId o usuario");
 
-        List<Ticket> lista = filtrar(eventoId, usuario).stream()
-            .filter(t -> t.claveS3 != null).toList();
+        List<Ticket> lista = filtrar(eventoId, usuario);
 
         if (lista.isEmpty())
             throw new ResponseStatusException(
@@ -89,7 +83,7 @@ public class TicketOperationsController {
         try (ZipOutputStream zip = new ZipOutputStream(salida)) {
             for (Ticket t : lista) {
                 zip.putNextEntry(new ZipEntry(t.nombreArchivo));
-                zip.write(storage.descargar(t.claveS3));
+                zip.write(contenido(t));
                 zip.closeEntry();
             }
         }
@@ -125,57 +119,27 @@ public class TicketOperationsController {
         t.detalle = cambio.detalle().substring(
             0, Math.min(120, cambio.detalle().length()));
 
-        Path archivo = Paths.get(System.getenv()
-            .getOrDefault("TICKETS_DIR", "./data/tickets"))
-            .resolve(t.nombreArchivo);
-
         try {
-            Files.createDirectories(archivo.getParent());
-
-            try (PDDocument pdf = new PDDocument()) {
-                PDPage pagina = new PDPage(PDRectangle.A4);
-                pdf.addPage(pagina);
-
-                try (PDPageContentStream c =
-                        new PDPageContentStream(pdf, pagina)) {
-                    String[] lineas = {
-                        "TICKET DE RESERVA",
-                        "Ticket: " + t.id,
-                        "Evento: " + e.nombre,
-                        "Fecha: " + e.fecha,
-                        "Usuario: " + t.usuario,
-                        "Entradas: " + r.cantidad,
-                        "Precio unitario: $" + r.precioUnitario,
-                        "TOTAL: $" + r.total,
-                        "Detalle: " + t.detalle
-                    };
-
-                    int y = 770;
-                    for (String linea : lineas) {
-                        String seguro = Normalizer.normalize(
-                            linea, Normalizer.Form.NFD)
-                            .replaceAll("\\p{M}", "")
-                            .replaceAll("[^\\x20-\\x7E]", "?");
-
-                        c.beginText();
-                        c.setFont(new PDType1Font(
-                            Standard14Fonts.FontName.HELVETICA), 12);
-                        c.newLineAtOffset(50, y);
-                        c.showText(seguro);
-                        c.endText();
-                        y -= 30;
-                    }
-                }
-                pdf.save(archivo.toFile());
+            pdf.generar(t, r, e);
+            if (t.claveS3 != null) {
+                t.claveS3 = storage.subir(t, pdf.archivo(t));
             }
-
-            t.claveS3 = storage.subir(t, archivo);
             return tickets.save(t);
-
         } catch (IOException ex) {
-            throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "No se pudo actualizar PDF", ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "No se pudo actualizar el resumen PDF", ex);
+        }
+    }
+
+    private byte[] contenido(Ticket ticket) throws IOException {
+        if (ticket.claveS3 != null) {
+            return storage.descargar(ticket.claveS3);
+        }
+        try {
+            return Files.readAllBytes(pdf.archivo(ticket));
+        } catch (NoSuchFileException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Archivo del resumen no encontrado", ex);
         }
     }
 
@@ -190,9 +154,7 @@ public class TicketOperationsController {
         tickets.delete(t);
 
         try {
-            Files.deleteIfExists(Paths.get(System.getenv()
-                .getOrDefault("TICKETS_DIR", "./data/tickets"))
-                .resolve(t.nombreArchivo));
+            Files.deleteIfExists(pdf.archivo(t));
         } catch (IOException ignored) {
             // El archivo temporal puede limpiarse posteriormente.
         }
