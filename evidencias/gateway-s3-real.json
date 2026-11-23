@@ -10,7 +10,7 @@
   "fallidas": 0,
   "verificacion_fallidas": "Pestana Failed: No failed tests",
   "backend_commit": "1fe4f20",
-  "deploy_run": "https://github.com/mcabri84/cdy2204-exp1-s3/actions/runs/45229246714",
+  "deploy_run": "https://github.com/mcabri84/cdy2204-exp2-s5/actions/runs/45229246714",
   "resultados": [
     {
       "paso": 1,

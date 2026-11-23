@@ -5,7 +5,7 @@ ESTADO TÉCNICO
 Backend con Spring Security, Azure B2C, API Gateway y S3 verificado en una corrida real: 14 solicitudes, 21 comprobaciones, 0 errores y ninguna prueba fallida. Además, 17 pruebas Maven aprobadas y despliegue GitHub Actions exitoso. Las 11 rutas rechazan solicitudes sin token.
 
 REPOSITORIO PARA AVA
-https://github.com/mcabri84/cdy2204-exp1-s3/tree/exp2-semana5
+https://github.com/mcabri84/cdy2204-exp2-s5/tree/exp2-semana5
 Usar la rama exp2-semana5. La rama main conserva la actividad anterior.
 
 API
