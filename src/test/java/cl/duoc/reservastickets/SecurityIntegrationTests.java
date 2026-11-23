@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
     properties = {"spring.datasource.url=jdbc:h2:mem:security-tests",
         "spring.jpa.hibernate.ddl-auto=create-drop"})
 class SecurityIntegrationTests {
-    private static final String ISSUER = "https://gestionguiasmcabri2026.b2clogin.com/3f3062b4-4f5c-4d4f-a8de-239dc8df83f7/v2.0/";
+    private static final String ISSUER = "https://gestionguiasmcabri2026.b2clogin.com/tfp/3f3062b4-4f5c-4d4f-a8de-239dc8df83f7/b2c_1_eventos_signupsignin/v2.0/";
     private static final String AUDIENCE = "0c3e4311-80ac-4edb-8a72-7c9b248cbfb1";
     private static final String POLICY = "B2C_1_eventos_signupsignin";
     private static HttpServer jwksServer;
